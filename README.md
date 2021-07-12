@@ -1,12 +1,12 @@
 
 ## Авторизация: 
   gitlab: Токен для гитлаба из переменных окружения `{GITLAB_ACCESS_TOKEN}`
-  jira: Из переменных окружения, строка `{JIRA_USERNAME}:{JIRA_PASSWORD}` превращёная через **base64** в хэш и переданный в заголовок `Authentication: Basic {token}`
+  jira: Из переменных окружения, строка `{JIRA_USER}:{JIRA_PASSWORD}` превращёная через **base64** в хэш и переданный в заголовок `Authentication: Basic {token}`
 
 ## Подготовка к запросам
 В каждый запрос: 
 1. В апи гитлаба подставлять хэдер с токеном: `PRIVATE-TOKEN: {GITLAB_ACCESS_TOKEN}`
-2. В апи jira подставлять токен бэсик авторизации Authentication: `Basic {base64(`${JIRA_USERNAME}:${JIRA_PASSWORD}`)}`
+2. В апи jira подставлять токен бэсик авторизации Authentication: `Basic {base64(`${JIRA_USER}:${JIRA_PASSWORD}`)}`
 3. В апи бота телеги подставлять хедер Content-Type: application/json
 
 ## Псевдо реализация
@@ -40,7 +40,7 @@
   ИНАЧЕ {
     1. Дернуть апи на мерж
       Дока: https://docs.gitlab.com/ee/api/merge_requests.html#merge-to-default-merge-ref-path
-      Апи: GET https://git.agro-it.team/api/v4//projects/16/merge_requests/:merge_request_iid/merge_ref
+      Апи: PUT https://git.agro-it.team/api/v4//projects/16/merge_requests/:merge_request_iid/merge
     2. Закрыть тикет
       Дока: 
         https://docs.atlassian.com/software/jira/docs/api/REST/7.11.0/#api/2/issue-doTransition

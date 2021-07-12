@@ -3,15 +3,19 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon src/server.js"
   },
   "author": "Журавлёв Филипп <fzhuravlev@fil-it.ru>",
   "license": "MIT",
   "dependencies": {
+    "@koa/router": "^10.0.0",
     "axios": "^0.21.1",
     "base-64": "^1.0.0",
     "dotenv": "^10.0.0",
     "koa": "^2.13.1",
+    "koa-mount": "^4.0.0",
+    "koa-static": "^5.0.0",
     "lodash": "^4.17.21",
     "urijs": "^1.19.6"
   },
