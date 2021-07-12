@@ -1,5 +1,10 @@
 require('dotenv').config()
 const Koa = require('koa');
+const path = require('path');
+const serveStaticFiles = require('koa-static');
+const mount = require('koa-mount');
+const { apiRouter } = require('./routes/api');
+const { pagesRouter } = require('./routes/pages');
 const app = new Koa();
 
 // logger
@@ -23,4 +28,10 @@ app.on('error', err => {
   console.error('server error', err)
 });
 
-app.listen(3000);
+app.use(mount('/static', serveStaticFiles(path.resolve(__dirname, 'static'))))
+app.use(mount('/api', apiRouter.routes()))
+app
+  .use(pagesRouter.routes())
+  .use(pagesRouter.allowedMethods());
+
+app.listen(4000);
