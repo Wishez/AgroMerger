@@ -23,4 +23,14 @@ test(
   }
 )
 
-// Тест мержа требуется делать на тестовых данных:)
+// test(
+//   'Мерж мерж реквеста', 
+//   async () => {
+//     const ticketName = 'AMPDD-1153'
+//     const mergeRequest = await gitlabApi.getMergeRequest(ticketName, 16)
+    
+//     return gitlabApi.mergeMergeRequest(mergeRequest).then((isMerged) => {
+//       expect(typeof isMerged === 'boolean').toBeTruthy()
+//     })
+//   }
+// )

@@ -14,33 +14,43 @@ class GitlabApi {
   })
 
   getMergeRequest = async (ticketName, projectId) => {
-    const response = await this.request({
-      path: `/projects/${projectId}/merge_requests?source_branch=feature/${ticketName}`,
-    }) 
-    if (!isStatusOk(response)) return null
+    try {
+      const response = await this.request({
+        path: `/projects/${projectId}/merge_requests?source_branch=feature/${ticketName}`,
+      }) 
 
-    return response.data?.[0]
+      return isStatusOk(response) ? response.data?.[0] : null
+    } catch (e) {
+      return null
+    }
   }
 
   rebaseMergeRequest = async (mergeRequest) => {
-    const { has_conflicts, merge_status, source_project_id, iid } = mergeRequest
-    if (has_conflicts || merge_status !== 'can_be_merged') return false
+    try {
+      const { source_project_id, iid } = mergeRequest
+      const response = await this.request({
+        path: `/projects/${source_project_id}/merge_requests/${iid}/rebase`,
+        method: 'PUT',
+      })
 
-    const response = await this.request({
-      path: `/projects/${source_project_id}/merge_requests/${iid}/rebase`,
-      method: 'PUT',
-    })
-
-    return isStatusOk(response)
+      return isStatusOk(response)
+    } catch (e) {
+      return false
+    }
   }
 
   mergeMergeRequest = async (mergeRequest) => {
-    const { source_project_id, iid } = mergeRequest
-    const response = await this.request({
-      path: `/projects/${source_project_id}/merge_requests/${iid}/merge_ref`,
-    })
+    try {
+      const { source_project_id, iid } = mergeRequest
+      const response = await this.request({
+        path: `/projects/${source_project_id}/merge_requests/${iid}/merge`,
+        method: 'PUT'
+      })
 
-    return isStatusOk(response)
+      return isStatusOk(response)
+    } catch (e) {
+      return false
+    }
   }
 }
 
