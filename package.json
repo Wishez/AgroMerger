@@ -2,11 +2,21 @@
   "name": "AgroMerger",
   "version": "1.0.0",
   "main": "src/server.js",
+  "scripts": {
+    "test": "jest"
+  },
   "author": "Журавлёв Филипп <fzhuravlev@fil-it.ru>",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.21.1",
+    "base-64": "^1.0.0",
     "dotenv": "^10.0.0",
-    "koa": "^2.13.1"
+    "koa": "^2.13.1",
+    "lodash": "^4.17.21",
+    "urijs": "^1.19.6"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6",
+    "nodemon": "^2.0.12"
   }
 }

@@ -1,11 +1,11 @@
 
 ## Авторизация: 
-  gitlab: Токен для гитлаба из переменных окружения `{GITLAB_API_TOKEN}`
+  gitlab: Токен для гитлаба из переменных окружения `{GITLAB_ACCESS_TOKEN}`
   jira: Из переменных окружения, строка `{JIRA_USERNAME}:{JIRA_PASSWORD}` превращёная через **base64** в хэш и переданный в заголовок `Authentication: Basic {token}`
 
 ## Подготовка к запросам
 В каждый запрос: 
-1. В апи гитлаба подставлять хэдер с токеном: `PRIVATE-TOKEN: {GITLAB_API_TOKEN}`
+1. В апи гитлаба подставлять хэдер с токеном: `PRIVATE-TOKEN: {GITLAB_ACCESS_TOKEN}`
 2. В апи jira подставлять токен бэсик авторизации Authentication: `Basic {base64(`${JIRA_USERNAME}:${JIRA_PASSWORD}`)}`
 3. В апи бота телеги подставлять хедер Content-Type: application/json
 
@@ -33,35 +33,34 @@
     Дока: https://core.telegram.org/bots/api#sendmessage
     Апи: POST https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage
     Content-Type: application/json
-    BODY
-    {
+    Query string
       chat_id: developers[gitlabNickname], // string or int, @channelusername or identifier 
       text: `Боту не удалось ребейзнуть задчаку ${ticketName}. ${developerName}, ребейзни, плииз:) ${mergeRequestLink}`,
-    }
   }
   ИНАЧЕ {
     1. Дернуть апи на мерж
       Дока: https://docs.gitlab.com/ee/api/merge_requests.html#merge-to-default-merge-ref-path
       Апи: GET https://git.agro-it.team/api/v4//projects/16/merge_requests/:merge_request_iid/merge_ref
     2. Закрыть тикет
-      Дока: https://developer.atlassian.com/server/jira/platform/jira-rest-api-examples/#editing-an-issue-examples
-      Апи: PUT https://jira.phoenixit.ru/rest/api/2/issue/AMPDD-number
+      Дока: 
+        https://docs.atlassian.com/software/jira/docs/api/REST/7.11.0/#api/2/issue-doTransition
+        https://community.atlassian.com/t5/Jira-questions/How-to-change-the-issue-status-by-REST-API-in-JIRA/qaq-p/850658
+        Просмотр айдишников: https://jira.phoenixit.ru/rest/api/2/issue/AMPDD-638/transitions?expand=transitions.fields
+      Апи: POST https://jira.phoenixit.ru/rest/api/2/issue/AMPDD-number/transitions
       BODY: 
       {
-        update: {
-          status: [{ set: "Закрыт" }], // Статусы: READY TO MERGE, Закрыт
-        }
+        transition: {
+          id: "911", // айдишник статуса Закрыт https://jira.phoenixit.ru/rest/api/2/issue/AMPDD-638/transitions?expand=transitions.fields
+        },
       }
     3. Оповестить о закрытие задачи
       Дока https://core.telegram.org/bots/api#sendmessage
       Апи: POST https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage
       Content-Type: application/json
-      BODY
-      {
+      Query string
         chat_id: {@Имя чата для оповещения смерженных задач}, // string or int, @channelusername or identifier 
         text: `
           Задача, ${ticketName} входящая в релиз v${currentReleaseVersion}, смержена.
           МР: ${mergeRequestUrl}.
           Тикет: ${ticketUrl}.`,
-      }
   }
