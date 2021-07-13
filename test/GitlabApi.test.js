@@ -1,14 +1,15 @@
+require('dotenv').config()
 const { GitlabApi } = require("../src/components/Gitlab");
 
-const gitlabApi = new GitlabApi()
+const gitlabApi = new GitlabApi({ accessToken: process.env.GITLAB_AGROMARKET_ACCESS_TOKEN, projectId: 16 })
+const docsGitlabApi = new GitlabApi({ accessToken: process.env.GITLAB_DOCS_ACCESS_TOKEN, projectId: 28 })
 
 test(
   'Запрос мерж реквеста', 
-  () => 
-    gitlabApi.getMergeRequest('AMPDD-1154', 16)
-      .then((mergeRequest) => {
-        expect(mergeRequest.iid).toBe(298)
-      })
+  () =>  docsGitlabApi.getMergeRequest('AMPDD-1007')
+    .then((mergeRequest) => {
+      expect(mergeRequest?.iid).toBe(53)
+    })
 )
 
 test(
