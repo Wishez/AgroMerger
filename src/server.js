@@ -3,12 +3,13 @@ const Koa = require('koa');
 const path = require('path');
 const serveStaticFiles = require('koa-static');
 const mount = require('koa-mount');
+const bodyParser = require('koa-bodyparser');
 const { apiRouter } = require('./routes/api');
 const { pagesRouter } = require('./routes/pages');
 const app = new Koa();
+app.use(bodyParser())
 
 // logger
-
 app.use(async (ctx, next) => {
   await next();
   const rt = ctx.response.get('X-Response-Time');
@@ -16,7 +17,6 @@ app.use(async (ctx, next) => {
 });
 
 // x-response-time
-
 app.use(async (ctx, next) => {
   const start = Date.now();
   await next();

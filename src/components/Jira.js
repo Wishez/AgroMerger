@@ -18,7 +18,12 @@ class JiraApi {
     method,
   })
 
-  getCurrentReleaseVersion = async () => {
+  getCurrentReleaseVersion = async (releaseVersion) => {
+    if (releaseVersion) {
+      this.currentReleaseVersion = releaseVersion
+      return releaseVersion
+    }
+
     try {
       const response = await this.request({
         path: '/issue/createmeta?projectKeys=AMPDD&expand=projects.issuetypes.fields',
@@ -47,8 +52,8 @@ class JiraApi {
     }
   }
 
-  getTicketsOfReadyToRelease = async () => {
-    const currentReleaseVersion = await this.getCurrentReleaseVersion()
+  getTicketsOfReadyToRelease = async (releaseVersion) => {
+    const currentReleaseVersion = await this.getCurrentReleaseVersion(releaseVersion)
     if (!currentReleaseVersion) return []
 
     const readyToMergeTickets = await this.getTicketsOfReadyToMerge()
