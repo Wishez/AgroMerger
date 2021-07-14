@@ -30,7 +30,7 @@ class AgroMerger {
   }
 
   mergeTickets = async (ticketsToMerge) => {
-    const { repositories } = this
+    const { repositories, jira } = this
     const tickets = {
       merged: [],
       unable: []
