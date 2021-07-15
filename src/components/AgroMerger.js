@@ -30,7 +30,7 @@ class AgroMerger {
   }
 
   mergeTickets = async (ticketsToMerge) => {
-    const { repositories, jira } = this
+    const { repositories, jira, telegramBot } = this
     const tickets = {
       merged: [],
       unable: []
@@ -69,7 +69,6 @@ class AgroMerger {
           DeveloperTelegram.mergingNotice,
           `Я попытался, однако ветки с именем feature/${ticketName}, в проекте ${projectId} нет`,
         )
-  
       }
 
       return result
@@ -98,7 +97,7 @@ class AgroMerger {
       await telegramBot.sendMessage(
         DeveloperTelegram.mergingNotice,
         `${title}
-         ${isSuccess ? `Смержил МР` : `Не смержил МР. Посмотрите, что там, плиз`}.
+         ${isSuccess ? `Смержил МР` : `Не смог смержить МР. Посмотрите, что там, плиз`}.
          Тикет: https://jira.phoenixit.ru/browse/${ticketName}
          МР: ${web_url}
         `
