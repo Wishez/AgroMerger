@@ -4,7 +4,19 @@
   "main": "src/server.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon src/server.js"
+    "start": "nodemon src/server.js",
+    "lint": "eslint src/ --ext .js",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/*.js": [
+      "yarn lint:fix"
+    ]
   },
   "author": "Журавлёв Филипп <fzhuravlev@fil-it.ru>",
   "license": "MIT",
@@ -21,7 +33,12 @@
     "urijs": "^1.19.6"
   },
   "devDependencies": {
+    "eslint": "^7.31.0",
+    "eslint-config-node": "^4.1.0",
+    "eslint-plugin-import": "^2.23.4",
+    "husky": "4.3.8",
     "jest": "^27.0.6",
+    "lint-staged": "^11.0.1",
     "nodemon": "^2.0.12"
   }
 }

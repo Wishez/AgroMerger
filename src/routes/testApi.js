@@ -1,11 +1,11 @@
 require('dotenv').config()
-const Router = require('@koa/router');
-const { AgroMerger } = require("../components/AgroMerger");
-const { RepositoryId } = require('../components/constants');
-const { GitlabApi } = require("../components/Gitlab");
-const { JiraApi } = require("../components/Jira");
-const { TelegramBotApi } = require("../components/TelegramBot");
-const { timeout } = require('../utils/helpers');
+const Router = require('@koa/router')
+const { AgroMerger } = require("../components/AgroMerger")
+const { RepositoryId } = require('../components/constants')
+const { GitlabApi } = require("../components/Gitlab")
+const { JiraApi } = require("../components/Jira")
+const { TelegramBotApi } = require("../components/TelegramBot")
+const { timeout } = require('../utils/helpers')
 
 const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,
@@ -35,20 +35,18 @@ apiTestRouter.get('/test/merge', async (ctx) => {
 
   await timeout(4000)
   
-  await Promise.all(repositories.reduce((result, gitlab) => {
-    return [
+  await Promise.all(repositories.reduce((result, gitlab) => [
       ...result,
       gitlab.createBranch(targetBranchName, 'master'),
       gitlab.createBranch(sourceBranchName, `feature/${targetBranchName}`),
-    ]
-  }, []))
+    ], []))
 
   await timeout(4000)
 
   await Promise.all(repositories.map((gitlab) => gitlab.createMergeRequest({
     targetBranchName: `feature/${targetBranchName}`,
     ticketName: sourceBranchName,
-    title: `${sourceBranchName} - Бот могёт создавать мерж реквесты`
+    title: `${sourceBranchName} - Бот могёт создавать мерж реквесты`,
   })))
 
   await timeout(4000)

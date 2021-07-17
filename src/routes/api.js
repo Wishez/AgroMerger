@@ -1,11 +1,11 @@
 require('dotenv').config()
-const Router = require('@koa/router');
-const { AgroMerger } = require("../components/AgroMerger");
-const { RepositoryId } = require('../components/constants');
-const { GitlabApi } = require("../components/Gitlab");
-const { JiraApi } = require("../components/Jira");
-const { TelegramBotApi } = require("../components/TelegramBot");
-const { apiTestRouter } = require('./testApi');
+const Router = require('@koa/router')
+const { AgroMerger } = require("../components/AgroMerger")
+const { RepositoryId } = require('../components/constants')
+const { GitlabApi } = require("../components/Gitlab")
+const { JiraApi } = require("../components/Jira")
+const { TelegramBotApi } = require("../components/TelegramBot")
+const { apiTestRouter } = require('./testApi')
 
 const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,

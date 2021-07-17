@@ -21,7 +21,8 @@ class AgroMerger {
       const { currentReleaseVersion } = jira
       await telegramBot.sendMessage(
         DeveloperTelegram.commonGroup,
-        `Попытался смержить тикеты, но их нет. ${currentReleaseVersion ? `Текущая версия релиза: ${currentReleaseVersion}` : 'Не удалось получить текущую версию релиза.'}`
+        `Попытался смержить тикеты, но их нет. 
+        ${currentReleaseVersion ? `Текущая версия релиза: ${currentReleaseVersion}` : 'Не удалось получить текущую версию релиза.'}`
       )
       return null
     }
@@ -32,11 +33,11 @@ class AgroMerger {
   }
 
   mergeTickets = (ticketsToMerge) =>
-    new Promise(async (resolve) => {
+    new Promise((resolve) => {
       const { repositories, jira, telegramBot } = this
       const tickets = {
         merged: [],
-        unable: []
+        unable: [],
       }
       const mergingRequests = ticketsToMerge.map(async (ticket) => {
         await timeout(4000) // Искусственная задержка для обновления данных в базе гитлаба
@@ -105,7 +106,9 @@ class AgroMerger {
           ? DeveloperTelegram[author.username] || DeveloperTelegram.commonGroup
           : DeveloperTelegram.commonGroup,
         isNotRebased 
-          ? `Хочу смержить задачку ${ticketName}, однако не получается:с Ребейзни её, пожалуйста, там есть конфликты. Вот ссылка: ${web_url}`
+          ? `Хочу смержить задачку ${ticketName}, однако не получается:с
+             Ребейзни её, пожалуйста, там есть конфликты.
+             Вот ссылка: ${web_url}`
           : `Задачка ${ticketName} ребейзнута. Иду мержить;)`,
       )
 

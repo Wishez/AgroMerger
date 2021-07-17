@@ -1,10 +1,16 @@
-const fs = require('fs');
-const path = require('path');
-const Router = require('@koa/router');
+const fs = require('fs')
+const path = require('path')
+const Router = require('@koa/router')
 const pagesRouter = new Router()
 
-pagesRouter.get('/', (ctx) => {
-  const page = fs.readFileSync(path.resolve(__dirname, '../index.html'))
+pagesRouter.get('/', async (ctx) => {
+  const page = await new Promise((resolve, reject) => {
+    fs.readFile(path.resolve(__dirname, '../index.html'), (error, data) => {
+      if (error) return reject(error)
+
+      resolve(data)
+    })
+  })
   ctx.set('Content-Type', 'text/html')
   ctx.body = page
 })
@@ -16,5 +22,5 @@ pagesRouter.get('/:url', '/:url/:next', (ctx) => {
 })
 
 module.exports = {
-  pagesRouter
+  pagesRouter,
 }

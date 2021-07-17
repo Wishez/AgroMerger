@@ -21,7 +21,7 @@ class TelegramBotApi {
         query: {
           chat_id: chatId,
           text,
-        }
+        },
       })
       return isStatusOk(response)
     } catch (e) {

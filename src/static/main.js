@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const resultBlock = document.querySelector('#result')
 const mergingButton = document.querySelector('#merge')
 const releaseVersionInput = document.querySelector('#releaseVersion')
