@@ -1,10 +1,11 @@
-require('dotenv').config()
 const { default: axios } = require('axios')
 const URI = require('urijs')
 const { isStatusOk } = require('../utils/response')
 
 class TelegramBotApi {
-  baseUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}` // POST или GET  запросы
+  constructor({ token }) {
+    this.baseUrl = `https://api.telegram.org/bot${token}`
+  }
 
   request = ({ path, method = 'post', query = {}, data }) => axios({
     url: new URI(`${this.baseUrl}${path}`).addQuery(query).toString(),

@@ -7,9 +7,19 @@ const { JiraApi } = require("../components/Jira");
 const { TelegramBotApi } = require("../components/TelegramBot");
 const { timeout } = require('../utils/helpers');
 
-const { GITLAB_AGROMARKET_ACCESS_TOKEN, GITLAB_DOCS_ACCESS_TOKEN, GITLAB_EMAILS_ACCESS_TOKEN } = process.env
-const jira = new JiraApi()
-const telegramBot = new TelegramBotApi()
+const {
+  GITLAB_AGROMARKET_ACCESS_TOKEN,
+  GITLAB_DOCS_ACCESS_TOKEN,
+  GITLAB_EMAILS_ACCESS_TOKEN,
+  JIRA_USER,
+  JIRA_PASSWORD,
+  TELEGRAM_BOT_TOKEN,
+} = process.env
+const jira = new JiraApi({
+  username: JIRA_USER,
+  password: JIRA_PASSWORD,
+})
+const telegramBot = new TelegramBotApi({ token: TELEGRAM_BOT_TOKEN })
 const agromarketGitlab = new GitlabApi({ accessToken: GITLAB_AGROMARKET_ACCESS_TOKEN, projectId: RepositoryId.agromarket })
 const docsGitlab = new GitlabApi({ accessToken: GITLAB_DOCS_ACCESS_TOKEN, projectId: RepositoryId.documents })
 const emailsGitlab = new GitlabApi({ accessToken: GITLAB_EMAILS_ACCESS_TOKEN, projectId: RepositoryId.emails })

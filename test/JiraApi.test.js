@@ -1,6 +1,13 @@
 const { JiraApi } = require("../src/components/Jira");
 
-const jiraApi = new JiraApi()
+const {
+  JIRA_USER,
+  JIRA_PASSWORD,
+} = process.env
+const jiraApi = new JiraApi({
+  username: JIRA_USER,
+  password: JIRA_PASSWORD,
+})
 
 test(
   'Получение текущей версии релиза',
