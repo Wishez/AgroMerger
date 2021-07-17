@@ -1,10 +1,8 @@
-const timeout = (delay) => {
-  return new Promise((resolve) => {
+const timeout = (delay) => new Promise((resolve) => {
     setTimeout(() => {
       resolve()
     }, delay)
   })
-}
 
 
 module.exports = {

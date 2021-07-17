@@ -1,0 +1,54 @@
+{
+  "extends": ["node"],
+  "parserOptions":  {
+    "sourceType":  "module"
+  },
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "semi": ["error", "never"],
+    "no-invalid-this": "off",
+    "linebreak-style": "off",
+    "max-len": ["error", 140],
+    "no-console": "off",
+    "import/no-commonjs": "off",
+    "spaced-comment": "off",
+    "import/no-cycle": "off",
+    "import/no-extraneous-dependencies": "off",
+    "import/no-useless-path-segments": "off",
+    "import/extensions": "off",
+    "no-param-reassign": "off",
+    "dot-notation": "off",
+    "no-restricted-imports": ["error", "lodash", "react-id-swiper"],
+    "operator-linebreak": "off",
+    "implicit-arrow-linebreak": "off",
+    "prefer-destructuring": "off",
+    "object-curly-newline": ["off", {
+      "ObjectExpression": { "minProperties": 0, "multiline": true },
+      "ObjectPattern": { "minProperties": 0, "multiline": true }
+    }],
+    "function-paren-newline": "off",
+    "no-else-return": ["error", { "allowElseIf": true }],
+    "padded-blocks": ["error", "never"],
+    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
+    "arrow-parens": "off",
+    "no-mixed-operators": "off",
+    "no-restricted-globals": "off",
+    "no-multi-spaces": "error",
+    "import/no-named-default": "off",
+    "import/prefer-default-export": "off",
+    "no-useless-escape": "error",
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "no-return-assign": ["error", "except-parens"],
+    "lines-between-class-members": "off",
+    "comma-dangle": ["error", {
+      "arrays": "always-multiline",
+      "exports": "always-multiline",
+      "functions": "ignore",
+      "imports": "always-multiline",
+      "objects": "always-multiline"
+    }],
+    "max-classes-per-file": "off"
+  }
+}

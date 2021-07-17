@@ -37,7 +37,7 @@ class GitlabApi {
         query: {
           branch: `feature/${ticketName}`,
           ref: targetBranchName,
-        }
+        },
       }) 
 
       return isStatusOk(response) ? response.data : null
@@ -68,7 +68,7 @@ class GitlabApi {
           source_branch: `feature/${ticketName}`,
           target_branch: targetBranchName,
           title,
-        }
+        },
       }) 
 
       return isStatusOk(response) ? response.data : null
@@ -110,7 +110,7 @@ class GitlabApi {
       const { source_project_id, iid } = mergeRequest
       const response = await this.request({
         path: `/projects/${source_project_id}/merge_requests/${iid}/merge`,
-        method: 'PUT'
+        method: 'PUT',
       })
 
       return isStatusOk(response)

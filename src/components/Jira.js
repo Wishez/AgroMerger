@@ -1,8 +1,8 @@
 require('dotenv').config()
-const { default: axios } = require('axios');
-const base64 = require('base-64');
-const get = require('lodash/get');
-const { isStatusOk } = require('../utils/response');
+const { default: axios } = require('axios')
+const base64 = require('base-64')
+const get = require('lodash/get')
+const { isStatusOk } = require('../utils/response')
 
 class JiraApi {
   constructor({ baseUrl = 'https://jira.phoenixit.ru', username, password }) {
@@ -42,6 +42,7 @@ class JiraApi {
   getTicketsOfReadyToMerge = async () => {
     try {
       const response = await this.request({
+        // eslint-disable-next-line max-len
         path: '/search?jql=project%20=%20AMPDD%20AND%20status%20=%20%22READY%20TO%20MERGE%22%20AND%20assignee%20in%20(fzhuravlev)%20ORDER%20BY%20summary%20ASC',
       })
       if (!isStatusOk(response)) return []
@@ -74,14 +75,13 @@ class JiraApi {
           transition: {
             id: "911",
           },
-        }
+        },
       })
 
       return isStatusOk(response)
     } catch (e) {
       return false
     }
-
   }
 }
 
