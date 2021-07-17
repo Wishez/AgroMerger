@@ -4,12 +4,12 @@ const base64 = require('base-64');
 const get = require('lodash/get');
 const { isStatusOk } = require('../utils/response');
 
-const { JIRA_USER, JIRA_PASSWORD } = process.env
-
 class JiraApi {
-  baseUrl = 'https://jira.phoenixit.ru/rest/api/2'
-  accessToken = base64.encode(`${JIRA_USER}:${JIRA_PASSWORD}`)
-  currentReleaseVersion = ''
+  constructor({ baseUrl = 'https://jira.phoenixit.ru', username, password }) {
+    this.baseUrl = `${baseUrl}/rest/api/2`
+    this.accessToken = base64.encode(`${username}:${password}`)
+    this.currentReleaseVersion = ''
+  }
 
   request = ({ path, method = 'GET', data }) => axios({
     url: `${this.baseUrl}${path}`,
