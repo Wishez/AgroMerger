@@ -2,6 +2,7 @@ const { timeout } = require("../utils/helpers")
 const filter = require("lodash/filter")
 const every = require("lodash/every")
 const { DeveloperTelegram, RepositoryName } = require("./constants")
+
 class AgroMerger {
   constructor({ repositories, gitlab, jira, telegramBot }) {
     if (typeof repositories === 'undefined' && typeof gitlab === 'undefined') {
@@ -39,13 +40,14 @@ class AgroMerger {
         merged: [],
         unable: [],
       }
-      const mergingRequests = ticketsToMerge.map(async (ticket) => {
-        await timeout(4000) // Искусственная задержка для обновления данных в базе гитлаба
+      const mergingRequests = ticketsToMerge.map(async (ticket, index) => {
+        const order = index + 1
+        await timeout(4000 * order) // Искусственная задержка для обновления данных в базе гитлаба
 
         const { key } = ticket
-        const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeTicket(key, gitlab)))
-
-        if (every(filter(mergingResult, { hasMR: true }), { isMerged: true })) {
+        const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeTicket(key, gitlab, order)))
+        const MRs = filter(mergingResult, { hasMR: true })
+        if (Object.keys(MRs) > 0 && every(MRs, { isMerged: true })) {
           const isTicketClosed = await jira.closeTicket(key)
           await telegramBot.sendMessage(
             DeveloperTelegram.commonGroup,
@@ -63,12 +65,14 @@ class AgroMerger {
       Promise.all(mergingRequests).then(() => resolve(tickets))
     })
 
-  mergeTicket = async (ticketName, gitlab) => {
+  mergeTicket = async (ticketName, gitlab, order = 1) => {
     const { mergeRequest, shouldNotTryToMergeMR } = await this.getMR(ticketName, gitlab)
     if (shouldNotTryToMergeMR) return { hasMR: false, isMerged: false }
 
-    await this.rebaseMR(ticketName, mergeRequest, gitlab)
-    await timeout(4000) // Искусственная задержка для обновления данных в базе гитлаба
+    const isRebased = await this.rebaseMR(ticketName, mergeRequest, gitlab)
+    if (!isRebased) return { hasMR: true, isMerged: false }
+
+    await timeout(4000 * order) // Искусственная задержка для обновления данных в базе гитлаба
     const isMerged = await this.mergeMR(ticketName, mergeRequest, gitlab)
 
     return { hasMR: true, isMerged }
@@ -86,7 +90,11 @@ class AgroMerger {
       } else if (isTargetBranchNotMaster) {
         await telegramBot.sendMessage(
           DeveloperTelegram.commonGroup,
-          `Таргет брэнч смотрит не в master. Пока что мержить не буду:)`,
+          `
+            Таргет брэнч смотрит не в master, а на ${result.target_branch}. Пока что мержить не буду:)
+            МР: ${result.web_url}
+            Тикет: https://jira.phoenixit.ru/browse/${ticketName}
+          `,
         )
       }
 
@@ -100,19 +108,21 @@ class AgroMerger {
     gitlab.rebaseMergeRequest(mergeRequest).then(async (isSuccess) => {
       const { telegramBot } = this
       const { web_url, author, has_conflicts, merge_status } = mergeRequest
-      const isNotRebased = !isSuccess || has_conflicts || merge_status !== 'can_be_merged'
+      const canBeMerged = merge_status === 'can_be_merged'
+      const isNotRebased = (!isSuccess || has_conflicts) && !canBeMerged
+
       await telegramBot.sendMessage(
         isNotRebased
           ? DeveloperTelegram[author.username] || DeveloperTelegram.commonGroup
           : DeveloperTelegram.commonGroup,
         isNotRebased 
           ? `Хочу смержить задачку ${ticketName}, однако не получается:с
-             Ребейзни её, пожалуйста, там есть конфликты.
-             Вот ссылка: ${web_url}`
+             ${has_conflicts ? 'Ребейзни её, пожалуйста, там есть конфликты.' : ''}
+             МР: ${web_url}`
           : `Задачка ${ticketName} ребейзнута. Иду мержить;)`,
       )
 
-      return isSuccess
+      return canBeMerged
     })
 
   mergeMR = async (ticketName, mergeRequest, gitlab) =>
