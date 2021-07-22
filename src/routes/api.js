@@ -30,10 +30,10 @@ const apiRouter = new Router()
 
 apiRouter.post('/merge', async (ctx) => {
   const { releaseVersion } = ctx.request?.body || {}
-  await agroMerger.mergeReleaseTickets(releaseVersion)
+  const data = await agroMerger.mergeReleaseTickets(releaseVersion)
   
   ctx.set('Content-Type', 'application/json')
-  ctx.body = { status: 'OK' }
+  ctx.body = { status: 'OK', data }
 })
 
 apiRouter.use(apiTestRouter.routes())

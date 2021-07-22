@@ -7,17 +7,22 @@
   <title>AgroHelper</title>
   <style>
     main {
-      padding-top: 32px;
+      padding-top: 42px;
     }
-    #releaseVersion {
-      margin-top: 32px;
+    .controls {
+      display: grid;
+      grid-template-columns: 360px 400px;
+      grid-gap: 42px;
+      align-items: center;
     }
   </style>
 </head>
 <body>
   <main class="container">
-    <button id="merge" class="pink darken-4 btn-large">Смержить релизные тикеты</button>
-    <input type="text" id="releaseVersion" placeholder="Версия релиза" />
+    <div class="controls">
+      <button id="merge" class="pink darken-4 btn-large">Смержить релизные тикеты</button>
+      <input type="text" id="releaseVersion" placeholder="Версия релиза" />
+    </div>
     <div id="result"></div>
   </main>
   
