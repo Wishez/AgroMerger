@@ -47,7 +47,7 @@ class AgroMerger {
         const { key } = ticket
         const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeTicket(key, gitlab, order)))
         const MRs = filter(mergingResult, { hasMR: true })
-        if (Object.keys(MRs) > 0 && every(MRs, { isMerged: true })) {
+        if (MRs.length > 0 && every(MRs, { isMerged: true })) {
           const isTicketClosed = await jira.closeTicket(key)
           await telegramBot.sendMessage(
             DeveloperTelegram.commonGroup,
@@ -91,7 +91,7 @@ class AgroMerger {
         await telegramBot.sendMessage(
           DeveloperTelegram.commonGroup,
           `
-            Таргет брэнч смотрит не в master, а на ${result.target_branch}. Пока что мержить не буду:)
+            Таргет брэнч смотрит ${ticketName} не в master, а на ${result.target_branch}. Пока что мержить не буду:)
             МР: ${result.web_url}
             Тикет: https://jira.phoenixit.ru/browse/${ticketName}
           `,
