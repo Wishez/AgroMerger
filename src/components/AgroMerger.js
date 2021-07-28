@@ -11,16 +11,16 @@ class AgroMerger {
 
     this.repositories = repositories || [gitlab]
     this.jira = jira
-    this.telegramBot = telegramBot
+    this.messager = telegramBot
   }
 
   mergeReleaseTickets = async (releaseVersion) => { 
-    const { jira, telegramBot } = this
+    const { jira, messager } = this
     const ticketsToMerge = await jira.getTicketsOfReadyToRelease(releaseVersion)
 
     if (ticketsToMerge.length === 0) {
       const { currentReleaseVersion } = jira
-      await telegramBot.sendMessage(
+      await messager.sendMessage(
         DeveloperTelegram.commonGroup,
         `Попытался смержить тикеты, но их нет. 
         ${currentReleaseVersion ? `Текущая версия релиза: ${currentReleaseVersion}` : 'Не удалось получить текущую версию релиза.'}`
@@ -35,7 +35,7 @@ class AgroMerger {
 
   mergeTickets = (ticketsToMerge) =>
     new Promise((resolve) => {
-      const { repositories, jira, telegramBot } = this
+      const { repositories, jira, messager } = this
       const tickets = {
         merged: [],
         unable: [],
@@ -49,7 +49,7 @@ class AgroMerger {
         const MRs = filter(mergingResult, { hasMR: true })
         if (MRs.length > 0 && every(MRs, { isMerged: true })) {
           const isTicketClosed = await jira.closeTicket(key)
-          await telegramBot.sendMessage(
+          await messager.sendMessage(
             DeveloperTelegram.commonGroup,
             `${key}
   
@@ -80,15 +80,15 @@ class AgroMerger {
 
   getMR = async (ticketName, gitlab) =>
     gitlab.getMergeRequest(ticketName).then(async (result) => {
-      const { telegramBot } = this
+      const { messager } = this
       const isTargetBranchNotMaster = result?.target_branch !== 'master'
       if (!result) {
-        await telegramBot.sendMessage(
+        await messager.sendMessage(
           DeveloperTelegram.commonGroup,
           `Я попытался, однако ветки с именем feature/${ticketName}, в проекте ${RepositoryName[gitlab.projectId]} нет`,
         )
       } else if (isTargetBranchNotMaster) {
-        await telegramBot.sendMessage(
+        await messager.sendMessage(
           DeveloperTelegram.commonGroup,
           `
             Таргет брэнч смотрит ${ticketName} не в master, а на ${result.target_branch}. Пока что мержить не буду:)
@@ -106,12 +106,12 @@ class AgroMerger {
 
   rebaseMR = async (ticketName, mergeRequest, gitlab) =>
     gitlab.rebaseMergeRequest(mergeRequest).then(async (isSuccess) => {
-      const { telegramBot } = this
+      const { messager } = this
       const { web_url, author, has_conflicts, merge_status } = mergeRequest
       const canBeMerged = merge_status === 'can_be_merged'
       const isNotRebased = (!isSuccess || has_conflicts) && !canBeMerged
 
-      await telegramBot.sendMessage(
+      await messager.sendMessage(
         isNotRebased
           ? DeveloperTelegram[author.username] || DeveloperTelegram.commonGroup
           : DeveloperTelegram.commonGroup,
@@ -128,8 +128,8 @@ class AgroMerger {
   mergeMR = async (ticketName, mergeRequest, gitlab) =>
     gitlab.mergeMergeRequest(mergeRequest).then(async (isSuccess) => {
       const { web_url, title } = mergeRequest
-      const { telegramBot } = this
-      await telegramBot.sendMessage(
+      const { messager } = this
+      await messager.sendMessage(
         DeveloperTelegram.commonGroup,
         `${title}
          ${isSuccess ? `Смержил МР` : `Не смог смержить МР. Посмотрите, что там, плиз`}.
