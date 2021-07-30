@@ -2,6 +2,7 @@ require('dotenv').config()
 const { default: axios } = require('axios')
 const base64 = require('base-64')
 const get = require('lodash/get')
+const find = require('lodash/find')
 const { isStatusOk } = require('../utils/response')
 
 class JiraApi {
@@ -43,7 +44,7 @@ class JiraApi {
     try {
       const response = await this.request({
         // eslint-disable-next-line max-len
-        path: '/search?jql=project%20=%20AMPDD%20AND%20status%20=%20%22READY%20TO%20MERGE%22%20AND%20assignee%20in%20(fzhuravlev)%20ORDER%20BY%20summary%20ASC',
+        path: `/search?jql=${encodeURIComponent('project = AMPDD AND issuetype = Task AND status = "READY TO MERGE" AND assignee in (fzhuravlev)')}`,
       })
       if (!isStatusOk(response)) return []
   
@@ -58,12 +59,7 @@ class JiraApi {
     if (!currentReleaseVersion) return []
 
     const readyToMergeTickets = await this.getTicketsOfReadyToMerge()
-    return readyToMergeTickets.filter(({ fields }) => {
-      const ticketVersion = fields.fixVersions[0]?.name
-      if (!ticketVersion) return false
-
-      return currentReleaseVersion === ticketVersion
-    })
+    return readyToMergeTickets.filter(({ fields }) => find(fields.fixVersions, { name: currentReleaseVersion }))
   }
 
   closeTicket = async (ticketName) => {

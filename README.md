@@ -1,7 +1,6 @@
 ## TODO
 1. Сделать удобный ответ от сервисов, к примеру, { meta: { status: 'OK', message: '' }, data: null }
-2. Реализовать очередь мержа
-3. Сделать апи работы со слэком
+2. Сделать апи работы со слэком
 
 ## Авторизация: 
   gitlab: Токены для гитлаба из переменных окружения `{GITLAB_AGROMARKET_ACCESS_TOKEN}`, `{GITLAB_DOCS_ACCESS_TOKEN}`, `{GITLAB_EMAILS_ACCESS_TOKEN}`
