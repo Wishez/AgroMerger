@@ -23,7 +23,7 @@ class TelegramBotApi {
           text,
         },
       })
-      return getResponse({ status: getResponseStatus(response), data: response?.data || [] })
+      return getResponse({ status: getResponseStatus(response), data: response?.data })
     } catch (e) {
       return getResponse({ status: 'ERROR', data: e.response?.data })
     }
