@@ -42,12 +42,12 @@ class AgroMerger {
     const MRs = filter(mergingResult, { hasMR: true })
     const shouldCloseTicket = MRs.length > 0 && every(MRs, { isMerged: true })
     if (shouldCloseTicket) {
-      const isTicketClosed = await jira.closeTicket(key)
+      const { meta } = await jira.closeTicket(key)
       await messager.sendMessage(
         DeveloperTelegram.commonGroup,
         `${key}
 
-         ${isTicketClosed ? `Тикет закрыл` : `Чот не получилось закрыть тикет:с`}.
+         ${meta.isStatusOk ? `Тикет закрыл` : `Чот не получилось закрыть тикет:с`}.
          Тикет: https://jira.phoenixit.ru/browse/${key}`
       )
     }
@@ -87,10 +87,11 @@ class AgroMerger {
   }
 
   getMR = async (ticketName, gitlab) =>
-    gitlab.getMergeRequest(ticketName).then(async (result) => {
+    gitlab.getMergeRequest(ticketName).then(async ({ data: MR }) => {
+      const { target_branch, web_url } = MR || {}
       const { messager } = this
-      const isTargetBranchNotMaster = result?.target_branch !== 'master'
-      if (!result) {
+      const isTargetBranchNotMaster = target_branch !== 'master'
+      if (!MR) {
         await messager.sendMessage(
           DeveloperTelegram.commonGroup,
           `Я попытался, однако ветки с именем feature/${ticketName}, в проекте ${RepositoryName[gitlab.projectId]} нет`,
@@ -99,24 +100,25 @@ class AgroMerger {
         await messager.sendMessage(
           DeveloperTelegram.commonGroup,
           `
-            Таргет брэнч смотрит ${ticketName} не в master, а на ${result.target_branch}. Пока что мержить не буду:)
-            МР: ${result.web_url}
+            Таргет брэнч смотрит ${ticketName} не в master, а на ${target_branch}. Пока что мержить не буду:)
+            МР: ${web_url}
             Тикет: https://jira.phoenixit.ru/browse/${ticketName}
           `,
         )
       }
 
       return {
-        mergeRequest: result,
-        shouldNotTryToMergeMR: !result || isTargetBranchNotMaster,
+        mergeRequest: MR,
+        shouldNotTryToMergeMR: !MR || isTargetBranchNotMaster,
       }
     })
 
   rebaseMR = async (ticketName, mergeRequest, gitlab) =>
-    gitlab.rebaseMergeRequest(mergeRequest).then(async (isSuccess) => {
+    gitlab.rebaseMergeRequest(mergeRequest).then(async ({ meta }) => {
+      const { isStatusOk } = meta
       const { messager } = this
       const { web_url, author, has_conflicts, blocking_discussions_resolved } = mergeRequest
-      const isNotRebased = !isSuccess || has_conflicts
+      const isNotRebased = !isStatusOk || has_conflicts
       await messager.sendMessage(
         isNotRebased
           ? DeveloperTelegram[author.username] || DeveloperTelegram.commonGroup
@@ -129,23 +131,24 @@ class AgroMerger {
           : `Задачка ${ticketName} ребейзнута. Иду мержить;)`,
       )
 
-      return isSuccess
+      return isStatusOk
     })
 
   mergeMR = async (ticketName, mergeRequest, gitlab) =>
-    gitlab.mergeMergeRequest(mergeRequest).then(async (isSuccess) => {
+    gitlab.mergeMergeRequest(mergeRequest).then(async ({ meta }) => {
+      const { isStatusOk } = meta
       const { web_url, title } = mergeRequest
       const { messager } = this
       await messager.sendMessage(
         DeveloperTelegram.commonGroup,
         `${title}
-         ${isSuccess ? `Смержил МР` : `Не смог смержить МР. Посмотрите, что там, плиз`}.
+         ${isStatusOk ? `Смержил МР` : `Не смог смержить МР. Посмотрите, что там, плиз`}.
          Тикет: https://jira.phoenixit.ru/browse/${ticketName}
          МР: ${web_url}
         `
       )
 
-      return isSuccess
+      return isStatusOk
     })
 }
 

@@ -1,6 +1,6 @@
 const { default: axios } = require('axios')
 const URI = require('urijs')
-const { isStatusOk } = require('../utils/response')
+const { getResponse, getResponseStatus } = require('../utils/response')
 
 class TelegramBotApi {
   constructor({ token }) {
@@ -23,9 +23,9 @@ class TelegramBotApi {
           text,
         },
       })
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response), data: response?.data || [] })
     } catch (e) {
-      return false
+      return getResponse({ status: 'ERROR', data: e.response?.data })
     }
   }
 }

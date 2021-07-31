@@ -1,4 +1,4 @@
-const { JiraApi } = require("../src/components/Jira");
+const { JiraApi } = require("../src/components/Jira")
 
 const {
   JIRA_USER,
@@ -12,7 +12,7 @@ const jiraApi = new JiraApi({
 test(
   'Получение текущей версии релиза',
   async () => {
-    const currentReleaseVersion = await jiraApi.getCurrentReleaseVersion()
+    const { data: currentReleaseVersion } = await jiraApi.getCurrentReleaseVersion()
     expect(currentReleaseVersion).toMatch(/\d+\.\d+\.\d+/)
   }
 )
@@ -20,7 +20,7 @@ test(
 test(
   'Получение тикетов в колонке Ready to merge назначенных на fzhuravlev',
   async () => {
-    const tickets = await jiraApi.getTicketsOfReadyToMerge()
+    const { data: tickets } = await jiraApi.getTicketsOfReadyToMerge()
     expect(Array.isArray(tickets)).toBeTruthy()
   }
 )
@@ -36,7 +36,7 @@ test(
 test(
   'Предвижения тикета в статус «Закрыт»',
   async () => {
-    const isTicketClosed = await jiraApi.closeTicket('AMPDD-638')
-    expect(typeof isTicketClosed === 'boolean').toBeTruthy()
+    const { meta } = await jiraApi.closeTicket('AMPDD-638')
+    expect(typeof meta.isStatusOk === 'boolean').toBeTruthy()
   }
 )

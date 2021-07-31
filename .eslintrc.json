@@ -6,6 +6,10 @@
   "env": {
     "node": true
   },
+  "globals": {
+    "test": true,
+    "expect": true
+  },
   "rules": {
     "semi": ["error", "never"],
     "no-invalid-this": "off",

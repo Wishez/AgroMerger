@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { default: axios } = require('axios')
 const URI = require('urijs')
-const { isStatusOk } = require('../utils/response')
+const { getResponse, getResponseStatus } = require('../utils/response')
 
 class GitlabApi {
   constructor({ baseUrl, accessToken, projectId }) {
@@ -23,9 +23,9 @@ class GitlabApi {
         path: `/projects/${this.projectId}/merge_requests?source_branch=feature/${ticketName}`,
       }) 
 
-      return isStatusOk(response) ? response.data?.[0] : null
+      return getResponse({ status: getResponseStatus(response), data: response?.data?.[0] || null })
     } catch (e) {
-      return null
+      return getResponse({ status: 'ERROR', data: null })
     }
   }
 
@@ -40,9 +40,9 @@ class GitlabApi {
         },
       }) 
 
-      return isStatusOk(response) ? response.data : null
+      return getResponse({ status: getResponseStatus(response), data: response?.data || null })
     } catch (e) {
-      return null
+      return getResponse({ status: 'ERROR', data: e.response?.data || null })
     }
   }
 
@@ -53,9 +53,9 @@ class GitlabApi {
         method: 'DELETE',
       }) 
 
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response) })
     } catch (e) {
-      return false
+      return getResponse({ status: 'ERROR' })
     }
   }
 
@@ -71,9 +71,9 @@ class GitlabApi {
         },
       }) 
 
-      return isStatusOk(response) ? response.data : null
+      return getResponse({ status: getResponseStatus(response), data: response?.data || null })
     } catch (e) {
-      return null
+      return getResponse({ status: 'ERROR', data: e.response?.data })
     }
   }
 
@@ -84,10 +84,9 @@ class GitlabApi {
         method: 'DELETE',
       }) 
 
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response), data: response?.data || null })
     } catch (e) {
-      console.log(e.response.data)
-      return false
+      return getResponse({ status: 'ERROR', data: e.response?.data })
     }
   }
 
@@ -99,9 +98,9 @@ class GitlabApi {
         method: 'PUT',
       })
 
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response), data: response?.data || null })
     } catch (e) {
-      return false
+      return getResponse({ status: 'ERROR', data: e.response?.data })
     }
   }
 
@@ -113,9 +112,9 @@ class GitlabApi {
         method: 'PUT',
       })
 
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response), data: response?.data || null })
     } catch (e) {
-      return false
+      return getResponse({ status: 'ERROR', data: e.response?.data })
     }
   }
 }
