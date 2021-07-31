@@ -1,9 +1,9 @@
 require('dotenv').config()
-const { AgroMerger } = require("../src/components/AgroMerger");
-const { RepositoryId } = require('../src/components/constants');
-const { GitlabApi } = require("../src/components/Gitlab");
-const { JiraApi } = require("../src/components/Jira");
-const { TelegramBotApi } = require("../src/components/TelegramBot");
+const { AgroMerger } = require("../src/components/AgroMerger")
+const { RepositoryId } = require('../src/components/constants')
+const { GitlabApi } = require("../src/components/Gitlab")
+const { JiraApi } = require("../src/components/Jira")
+const { TelegramBotApi } = require("../src/components/TelegramBot")
 
 const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,
@@ -23,7 +23,7 @@ const agroMerger = new AgroMerger({
     username: JIRA_USER,
     password: JIRA_PASSWORD,
   }),
-  telegramBot: new TelegramBotApi({ token: TELEGRAM_BOT_TOKEN })
+  telegramBot: new TelegramBotApi({ token: TELEGRAM_BOT_TOKEN }),
 })
 
 test(

@@ -3,7 +3,7 @@ const { default: axios } = require('axios')
 const base64 = require('base-64')
 const get = require('lodash/get')
 const find = require('lodash/find')
-const { isStatusOk } = require('../utils/response')
+const { getResponse, getResponseStatus } = require('../utils/response')
 
 class JiraApi {
   constructor({ baseUrl = 'https://jira.phoenixit.ru', username, password }) {
@@ -29,14 +29,14 @@ class JiraApi {
       const response = await this.request({
         path: '/issue/createmeta?projectKeys=AMPDD&expand=projects.issuetypes.fields',
       })
-      if (!isStatusOk(response)) return null
   
       this.currentReleaseVersion = get(response.data, 'projects.0.issuetypes.0.fields.fixVersions.allowedValues', [])
-        .filter(({ archived }) => !archived)[0]?.name
+        .filter(({ archived }) => !archived)[0]?.name || null
   
-      return this.currentReleaseVersion
+      
+      return getResponse({ status: getResponseStatus(response), data: this.currentReleaseVersion })
     } catch (e) {
-      return null
+      return getResponse({ status: 'ERROR', data: null })
     }
   }
 
@@ -46,19 +46,18 @@ class JiraApi {
         // eslint-disable-next-line max-len
         path: `/search?jql=${encodeURIComponent('project = AMPDD AND issuetype = Task AND status = "READY TO MERGE" AND assignee in (fzhuravlev)')}`,
       })
-      if (!isStatusOk(response)) return []
-  
-      return response.data.issues
+
+      return getResponse({ status: getResponseStatus(response), data: response?.data?.issues || [] })
     } catch (e) {
-      return []
+      return getResponse({ status: 'ERROR', data: [] })
     }
   }
 
   getTicketsOfReadyToRelease = async (releaseVersion) => {
-    const currentReleaseVersion = await this.getCurrentReleaseVersion(releaseVersion)
+    const { data: currentReleaseVersion } = await this.getCurrentReleaseVersion(releaseVersion)
     if (!currentReleaseVersion) return []
 
-    const readyToMergeTickets = await this.getTicketsOfReadyToMerge()
+    const { data: readyToMergeTickets } = await this.getTicketsOfReadyToMerge()
     return readyToMergeTickets.filter(({ fields }) => find(fields.fixVersions, { name: currentReleaseVersion }))
   }
 
@@ -74,9 +73,9 @@ class JiraApi {
         },
       })
 
-      return isStatusOk(response)
+      return getResponse({ status: getResponseStatus(response) })
     } catch (e) {
-      return false
+      return getResponse({ status: 'ERROR' })
     }
   }
 }
