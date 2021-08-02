@@ -106,14 +106,17 @@ class AgroMerger {
       const { target_branch, web_url } = MR || {}
       const { sendMessage } = this
       const isTargetBranchNotMaster = target_branch !== 'master'
+      const projectName = RepositoryName[gitlab.projectId]
       if (!MR) {
         await sendMessage(
-          `Я попытался, однако ветки с именем feature/${ticketName}, в проекте ${RepositoryName[gitlab.projectId]} нет`,
+          `Ветки с именем feature/${ticketName} нет. Название проекта: ${projectName}`,
         )
       } else if (isTargetBranchNotMaster) {
         await sendMessage(
           `
-            Таргет брэнч тикета *${ticketName}* смотрит не в master, а на *${target_branch}*. Пока что мержить не буду
+            Таргет брэнч тикета *${ticketName}* в проекте ${projectName} смотрит не в master, а на *${target_branch}*.
+            Пока что мержить не буду.
+
             *МР*: ${web_url}
             *Тикет*: https://jira.phoenixit.ru/browse/${ticketName}
           `,
@@ -131,13 +134,14 @@ class AgroMerger {
       const { isStatusOk } = meta
       const { web_url, author, has_conflicts, blocking_discussions_resolved } = mergeRequest
       const isNotRebased = !isStatusOk || has_conflicts
+      const projectName = RepositoryName[gitlab.projectId]
       await this.sendMessage(
         isNotRebased 
-          ? `Хочу смержить задачку *${ticketName}*, однако не получается:с
+          ? `Хочу смержить задачку *${ticketName}* в проекте ${projectName}, однако не получается:с
              ${has_conflicts ? 'Ребейзни её, пожалуйста, там есть конфликты.' : ''}
              ${blocking_discussions_resolved ? '' : 'Комменты не зарезолвлены.'}
              *МР*: ${web_url}`
-          : `Задачка *${ticketName}* ребейзнута. Иду мержить;)`,
+          : `Задачка *${ticketName}* в проекте ${projectName} ребейзнута. Иду мержить;)`,
         isNotRebased ? undefined : author.username,
       )
 
