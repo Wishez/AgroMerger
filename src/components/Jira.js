@@ -44,7 +44,7 @@ class JiraApi {
     try {
       const response = await this.request({
         // eslint-disable-next-line max-len
-        path: `/search?jql=${encodeURIComponent('project = AMPDD AND issuetype = Task AND status = "READY TO MERGE" AND assignee in (fzhuravlev)')}`,
+        path: `/search?jql=${encodeURIComponent('project = AMPDD AND status = "READY TO MERGE" AND assignee in (fzhuravlev)')}`,
       })
 
       return getResponse({ status: getResponseStatus(response), data: response?.data?.issues || [] })
