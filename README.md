@@ -4,12 +4,12 @@
 ## Авторизация: 
   gitlab: Токены для гитлаба из переменных окружения `{GITLAB_AGROMARKET_ACCESS_TOKEN}`, `{GITLAB_DOCS_ACCESS_TOKEN}`, `{GITLAB_EMAILS_ACCESS_TOKEN}`
 
-  jira: Из переменных окружения, строка `{JIRA_USER}:{JIRA_PASSWORD}` превращёная через **base64** в хэш и переданный в заголовок `Authentication: Basic {token}`
+  jira: Из переменных окружения, строка `{OLD/NEW_JIRA_USER}:{OLD/NEW_JIRA_PASSWORD}` превращёная через **base64** в хэш и переданный в заголовок `Authentication: Basic {token}`
 
 ## Подготовка к запросам
 В каждый запрос: 
 1. В апи гитлаба подставлять хэдер с токеном: `PRIVATE-TOKEN: {ACCESS_TOKEN}`
-2. В апи jira подставлять токен бэсик авторизации Authentication: `Basic {base64(`${JIRA_USER}:${JIRA_PASSWORD}`)}`
+2. В апи jira подставлять токен бэсик авторизации Authentication: `Basic {base64(`${OLD/NEW_JIRA_USER}:${OLD/NEW_JIRA_PASSWORD}`)}`
 3. В апи бота телеги подставлять хедер Content-Type: application/json
 
 ## Псевдо реализация

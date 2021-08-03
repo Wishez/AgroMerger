@@ -12,24 +12,44 @@ const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,
   GITLAB_DOCS_ACCESS_TOKEN,
   GITLAB_EMAILS_ACCESS_TOKEN,
-  JIRA_USER,
-  JIRA_PASSWORD,
+  OLD_JIRA_USER,
+  OLD_JIRA_PASSWORD,
+  NEW_JIRA_USER,
+  NEW_JIRA_PASSWORD,
   TELEGRAM_BOT_TOKEN,
   SLACK_TOKEN,
 } = process.env
+
 const telegramBot = { messager: new TelegramBotApi({ token: TELEGRAM_BOT_TOKEN }), channels: TelegramDeveloper } 
 const slackApp = { messager: new SlackApp({ token: SLACK_TOKEN }), channels: SlackDeveloper }
+
 const agromarketGitlab = new GitlabApi({ accessToken: GITLAB_AGROMARKET_ACCESS_TOKEN, projectId: RepositoryId.agromarket })
 const docsGitlab = new GitlabApi({ accessToken: GITLAB_DOCS_ACCESS_TOKEN, projectId: RepositoryId.documents })
 const emailsGitlab = new GitlabApi({ accessToken: GITLAB_EMAILS_ACCESS_TOKEN, projectId: RepositoryId.emails })
 
+const oldJira = new JiraApi({
+  projectId: 'AMPDD',
+  mergingUserId: 'fzhuravlev',
+  readyToMergeStatus: 'READY TO MERGE',
+  closingStatusId: '911',
+  baseUrl: 'https://jira.phoenixit.ru',
+  username: OLD_JIRA_USER,
+  password: OLD_JIRA_PASSWORD,
+})
+const newJira = new JiraApi({
+  projectId: 'DEV',
+  mergingUserId: '610189eeb704b40068aa84ba',
+  readyToMergeStatus: 'Ready to release',
+  closingStatusId: '31',
+  baseUrl: 'https://ddinvest.atlassian.net/',
+  username: NEW_JIRA_USER,
+  password: NEW_JIRA_PASSWORD,
+})
+
 const agroMerger = new AgroMerger({
   repositories: [agromarketGitlab, emailsGitlab, docsGitlab],
   messagers: [telegramBot, slackApp],
-  jira: new JiraApi({
-    username: JIRA_USER,
-    password: JIRA_PASSWORD,
-  }),
+  jiraApis: [oldJira, newJira],
 })
 const apiRouter = new Router()
 
