@@ -5,16 +5,19 @@ const { RepositoryName } = require("./constants")
 const { PromiseQueue } = require("./PromiseQueue")
 
 class AgroMerger {
-  constructor({ repositories, jira, messagers = [] }) {
+  constructor({ repositories = [], jiraApis = [], messagers = [] }) {
     if (repositories?.length < 1) {
       throw Error('Для работы с гитлабом требуется один или более инстансов.')
+    }
+    if (jiraApis?.length < 1) {
+      throw Error('Для работы с джирой требуется один или более инстансов.')
     }
     if (messagers?.length < 1) {
       throw Error('Укажи хотя бы один месседжер для нотификаций')
     }
 
     this.repositories = repositories
-    this.jira = jira
+    this.jiraApis = jiraApis
     this.messagers = messagers
     this.mergingQueue = new PromiseQueue()
   }
@@ -26,21 +29,22 @@ class AgroMerger {
 
         return messager.sendMessage(
           channels.commonGroup,
-          `${developer ? `<@${developer}>` : ''} ${message}`,
+          `${developer || ''} ${message}`,
         )
       })
     )
 
   mergeReleaseTickets = async (releaseVersion) => { 
-    const { jira, sendMessage } = this
-    const ticketsToMerge = await jira.getTicketsOfReadyToRelease(releaseVersion)
+    const { jiraApis, sendMessage } = this
+    const ticketsPromises = await Promise.all(jiraApis.map(jira => jira.getTicketsOfReadyToRelease(releaseVersion)))
+    const ticketsToMerge = ticketsPromises.flat()
 
     if (ticketsToMerge.length === 0) {
-      const { currentReleaseVersion } = jira
+      const { currentReleaseVersion } = jiraApis[0]
       await sendMessage(
         `
-        Попытался смержить тикеты, однако не нашёл их. 
-        ${currentReleaseVersion ? `Текущая версия релиза: *${currentReleaseVersion}*` : 'Не удалось получить текущую версию релиза.'}
+        Попытался смержить тикеты, однако не нашёл их🤷🏼‍♂️
+        Текущая версия релиза: *${currentReleaseVersion}*
         `
       )
       return null
@@ -52,18 +56,19 @@ class AgroMerger {
   }
 
   mergeTicket = async (ticket) => {
-    const { repositories, jira, sendMessage } = this
+    const { repositories, jiraApis, sendMessage } = this
     const { key } = ticket
-    const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeMergeRequest(key, gitlab)))
+    const jira = jiraApis.find(jira => key.includes(jira.projectId))
+    const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeMergeRequest({ ticketName: key, gitlab, jira })))
     const MRs = filter(mergingResult, { hasMR: true })
     const shouldCloseTicket = MRs.length > 0 && every(MRs, { isMerged: true })
     if (shouldCloseTicket) {
       const { meta } = await jira.closeTicket(key)
       await sendMessage(
-        `${key}
+        `*Задачка*: ${key}
 
          ${meta.isStatusOk ? `Тикет закрыл` : `Не получилось закрыть тикет:с`}.
-         *Тикет*: https://jira.phoenixit.ru/browse/${key}`
+         *Тикет*: ${jira.baseUrl}/browse/${key}`
       )
     }
 
@@ -87,38 +92,38 @@ class AgroMerger {
       Promise.all(mergingRequests).then(() => resolve(tickets))
     })
 
-  mergeMergeRequest = async (ticketName, gitlab) => {
-    const { mergeRequest, shouldNotTryToMergeMR } = await this.getMR(ticketName, gitlab)
+  mergeMergeRequest = async ({ ticketName, gitlab, jira }) => {
+    const baseMergingConfig = { ticketName, gitlab, jira }
+    const { mergeRequest, shouldNotTryToMergeMR } = await this.getMR(baseMergingConfig)
     if (shouldNotTryToMergeMR) return { hasMR: false, isMerged: false }
 
     await timeout(5000) // Искусственная задержка для обновления данных в базе гитлаба
-    const isRebased = await this.rebaseMR(ticketName, mergeRequest, gitlab)
+    const mergingConfigWithMR = { mergeRequest, ...baseMergingConfig }
+    const isRebased = await this.rebaseMR(mergingConfigWithMR)
     if (!isRebased) return { hasMR: true, isMerged: false }
 
     await timeout(5000)
-    const isMerged = await this.mergeMR(ticketName, mergeRequest, gitlab)
+    const isMerged = await this.mergeMR(mergingConfigWithMR)
 
     return { hasMR: true, isMerged }
   }
 
-  getMR = async (ticketName, gitlab) =>
+  getMR = async ({ ticketName, gitlab, jira }) =>
     gitlab.getMergeRequest(ticketName).then(async ({ data: MR }) => {
       const { target_branch, web_url } = MR || {}
       const { sendMessage } = this
       const isTargetBranchNotMaster = target_branch !== 'master'
       const projectName = RepositoryName[gitlab.projectId]
       if (!MR) {
-        await sendMessage(
-          `Ветки с именем feature/${ticketName} нет. Название проекта: ${projectName}`,
-        )
+        await sendMessage(`Ветки feature/${ticketName} нет в проекте ${projectName}🤓`)
       } else if (isTargetBranchNotMaster) {
         await sendMessage(
           `
-            Таргет брэнч тикета *${ticketName}* в проекте ${projectName} смотрит не в master, а на *${target_branch}*.
-            Пока что мержить не буду.
+            Таргет брэнч тикета *${ticketName}* в проекте ${projectName} смотрит не в master, а на *${target_branch}*😠
+            Пока что мержить не буду😤
 
             *МР*: ${web_url}
-            *Тикет*: https://jira.phoenixit.ru/browse/${ticketName}
+            *Тикет*: ${jira.baseUrl}/browse/${ticketName}
           `,
         )
       }
@@ -129,7 +134,7 @@ class AgroMerger {
       }
     })
 
-  rebaseMR = async (ticketName, mergeRequest, gitlab) =>
+  rebaseMR = async ({ ticketName, mergeRequest, gitlab, jira }) =>
     gitlab.rebaseMergeRequest(mergeRequest).then(async ({ meta }) => {
       const { isStatusOk } = meta
       const { web_url, author, has_conflicts, blocking_discussions_resolved } = mergeRequest
@@ -137,25 +142,27 @@ class AgroMerger {
       const projectName = RepositoryName[gitlab.projectId]
       await this.sendMessage(
         isNotRebased 
-          ? `Хочу смержить задачку *${ticketName}* в проекте ${projectName}, однако не получается:с
-             ${has_conflicts ? 'Ребейзни её, пожалуйста, там есть конфликты.' : ''}
-             ${blocking_discussions_resolved ? '' : 'Комменты не зарезолвлены.'}
-             *МР*: ${web_url}`
-          : `Задачка *${ticketName}* в проекте ${projectName} ребейзнута. Иду мержить;)`,
-        isNotRebased ? undefined : author.username,
+          ? `Хочу смержить задачку *${ticketName}* в проекте ${projectName}, однако не получается🤔
+             ${has_conflicts ? 'Есть конфликты ребейза🐭' : ''}
+             ${blocking_discussions_resolved ? '' : 'Комменты не зарезолвлены🐷'}
+             *МР*: ${web_url}
+             *Тикет*: ${jira.baseUrl}/browse/${ticketName} 
+             `
+          : `Задачка *${ticketName}* проекта ${projectName} ребейзнута. Иду мержить😎`,
+        author.username,
       )
 
       return isStatusOk
     })
 
-  mergeMR = async (ticketName, mergeRequest, gitlab) =>
+  mergeMR = async ({ ticketName, mergeRequest, gitlab, jira }) =>
     gitlab.mergeMergeRequest(mergeRequest).then(async ({ meta }) => {
       const { isStatusOk } = meta
       const { web_url, title } = mergeRequest
       await this.sendMessage(
-        `${title}
-         ${isStatusOk ? `Смержил МР` : `Не смог смержить МР. Посмотрите, что там, плиз`}.
-         *Тикет*: https://jira.phoenixit.ru/browse/${ticketName}
+        `*${title}*
+         ${isStatusOk ? `Смержил МР🤫` : `Не смог смержить МР👽`}.
+         *Тикет*: ${jira.baseUrl}/browse/${ticketName}
          *МР*: ${web_url}
         `
       )
