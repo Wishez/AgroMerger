@@ -20,7 +20,7 @@ const newJira = new JiraApi({
   projectId: 'DEV',
   mergingUserId: '610189eeb704b40068aa84ba',
   readyToMergeStatus: 'Ready to release',
-  closingStatusId: '31',
+  closingStatusId: '351',
   baseUrl: 'https://ddinvest.atlassian.net/',
   username: NEW_JIRA_USER,
   password: NEW_JIRA_PASSWORD,

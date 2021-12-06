@@ -1,5 +1,5 @@
 ## TODO
-1. Перейти на новую верси джиры
+1. Сделать настройку апи через application.conf
 
 ## Авторизация: 
   gitlab: Токены для гитлаба из переменных окружения `{GITLAB_AGROMARKET_ACCESS_TOKEN}`, `{GITLAB_DOCS_ACCESS_TOKEN}`, `{GITLAB_EMAILS_ACCESS_TOKEN}`
