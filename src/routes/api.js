@@ -12,6 +12,8 @@ const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,
   GITLAB_DOCS_ACCESS_TOKEN,
   GITLAB_EMAILS_ACCESS_TOKEN,
+  GITLAB_POLE_UI_ACCESS_TOKEN,
+  GITLAB_ADMIN_ACCESS_TOKEN,
   OLD_JIRA_USER,
   OLD_JIRA_PASSWORD,
   NEW_JIRA_USER,
@@ -26,6 +28,8 @@ const slackApp = { messager: new SlackApp({ token: SLACK_TOKEN }), channels: Sla
 const agromarketGitlab = new GitlabApi({ accessToken: GITLAB_AGROMARKET_ACCESS_TOKEN, projectId: RepositoryId.agromarket })
 const docsGitlab = new GitlabApi({ accessToken: GITLAB_DOCS_ACCESS_TOKEN, projectId: RepositoryId.documents })
 const emailsGitlab = new GitlabApi({ accessToken: GITLAB_EMAILS_ACCESS_TOKEN, projectId: RepositoryId.emails })
+const poleUiGitlab = new GitlabApi({ accessToken: GITLAB_POLE_UI_ACCESS_TOKEN, projectId: RepositoryId.poleUi })
+const adminGitlab = new GitlabApi({ accessToken: GITLAB_ADMIN_ACCESS_TOKEN, projectId: RepositoryId.admin })
 
 const oldJira = new JiraApi({
   projectId: 'AMPDD',
@@ -47,7 +51,7 @@ const newJira = new JiraApi({
 })
 
 const agroMerger = new AgroMerger({
-  repositories: [agromarketGitlab, emailsGitlab, docsGitlab],
+  repositories: [agromarketGitlab, emailsGitlab, docsGitlab, poleUiGitlab, adminGitlab],
   messagers: [telegramBot, slackApp],
   jiraApis: [oldJira, newJira],
 })

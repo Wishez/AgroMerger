@@ -30,12 +30,16 @@ const RepositoryId = {
   agromarket: 16,
   documents: 28,
   emails: 26,
+  poleUi: 43,
+  admin: 42,
 }
 
 const RepositoryName = {
   [RepositoryId.agromarket]: '«Агромаркет»',
   [RepositoryId.documents]: '«Документы»',
   [RepositoryId.emails]: '«Эмейлы»',
+  [RepositoryId.poleUi]: '«Pole UI»',
+  [RepositoryId.admin]: '«Админка менеджера»',
 }
 
 module.exports = {
