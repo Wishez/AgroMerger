@@ -34,14 +34,44 @@ class AgroMerger {
       })
     )
 
-  mergeReleaseTickets = async (releaseVersion) => { 
-    const { jiraApis, sendMessage } = this
-    const ticketsPromises = await Promise.all(jiraApis.map(jira => jira.getTicketsOfReadyToRelease(releaseVersion)))
-    const ticketsToMerge = ticketsPromises.flat()
+  getReadyToReleaseTickets = async (releaseVersion) => {
+    const ticketsPromises = await Promise.all(this.jiraApis.map(jira => jira.getTicketsOfReadyToRelease(releaseVersion)))
+
+    return ticketsPromises.flat()
+  }
+
+  getMergeRequestsStatusBeforeMerging = async (releaseVersion) => {
+    const ticketsToMerge = await this.getReadyToReleaseTickets(releaseVersion)
+    const result = await new Promise(async (resolve) => {
+      const mergeRequestsInfo = await Promise.all(ticketsToMerge.reduce((result, ticket) => 
+        [
+          ...result,
+          ...this.repositories.map(
+            gitlab =>
+              gitlab.getMergeRequest(ticket.key)
+                .then(({ data: MR }) => ({ hasMr: Boolean(MR), projectId: gitlab.projectId, tiketName: ticket.key }))
+          )
+        ],
+        [],
+      ))
+
+      const counter = {}
+      mergeRequestsInfo.forEach(({ hasMr, projectId, tiketName }) => {
+        if (!counter[projectId]) counter[projectId] = []
+        if (hasMr) counter[projectId].push(tiketName)
+      })
+      resolve(counter)
+    })
+
+    return result
+  }
+
+  mergeReleaseTickets = async (releaseVersion) => {
+    const ticketsToMerge = await this.getReadyToReleaseTickets(releaseVersion)
 
     if (ticketsToMerge.length === 0) {
-      const { currentReleaseVersion } = jiraApis[0]
-      await sendMessage(
+      const { currentReleaseVersion } = this.jiraApis[0]
+      await this.sendMessage(
         `
         Попытался смержить тикеты, однако не нашёл их🤷🏼‍♂️
         Текущая версия релиза: *${currentReleaseVersion}*
@@ -77,13 +107,12 @@ class AgroMerger {
 
   mergeTickets = (ticketsToMerge) => 
     new Promise((resolve) => {
-      const { mergingQueue, mergeTicket } = this
       const tickets = {
         merged: [],
         unable: [],
       }
       const mergingRequests = ticketsToMerge.map((ticket) => 
-        mergingQueue.add(() => mergeTicket(ticket))
+        this.mergingQueue.add(() => this.mergeTicket(ticket))
           .then((isTicketClosed) => {
             tickets[isTicketClosed ? 'merged' : 'unable'].push(ticket.key)
           })

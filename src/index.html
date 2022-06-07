@@ -20,12 +20,15 @@
 <body>
   <main class="container">
     <div class="controls">
-      <button id="merge" class="pink darken-4 btn-large">Смержить релизные тикеты</button>
       <input type="text" id="releaseVersion" placeholder="Версия релиза" />
+    </div>
+    <div class="controls">
+      <button id="merge" class="pink darken-4 btn-large">Смержить релизные тикеты</button>
+      <button id="get-merge-requests-status" class="pink darken-4 btn-large">Получить статус к мержу</button>
     </div>
     <div id="result"></div>
   </main>
-  
+
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
   <script defer src="/static/main.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
