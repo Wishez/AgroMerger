@@ -15,15 +15,11 @@ const TelegramDeveloper = {
 const SlackDeveloper = {
   fzhuravlev: '<@U028MMJU6LD> Фил Ж.',
   vkeller: '<@U028QN69X5G> Вероника К.',
-  edus: '<@U028J06HQ3G> Женя Д.',
-  ealyakin: '<@U028MMK00LD> Женя А.',
-  'v.domnin': '<@U0293C12341> Виталя Д.',
+  ealyakin: '<@U028MMK00LD> Женёк А.',
   'Nikolai.Maslak': '<@U028LTU016E> Коля М.',
+  'nmaksimenko': '<@U028LTU016E> Никита М.',
   commonGroup: 'C029LGA9R5L',
   rudakoff31: undefined,
-  aabdullatipov: undefined,
-  'Denis.Olkhovik': undefined,
-  vkornyshev: undefined,
 }
 
 const RepositoryId = {

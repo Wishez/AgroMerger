@@ -12,6 +12,7 @@ const {
   GITLAB_AGROMARKET_ACCESS_TOKEN,
   GITLAB_DOCS_ACCESS_TOKEN,
   GITLAB_EMAILS_ACCESS_TOKEN,
+  GITLAB_POLE_UI_ACCESS_TOKEN,
   NEW_JIRA_USER,
   NEW_JIRA_PASSWORD,
   TELEGRAM_BOT_TOKEN,
@@ -22,7 +23,9 @@ const slackApp = { messager: new SlackApp({ token: SLACK_TOKEN }), channels: Sla
 const agromarketGitlab = new GitlabApi({ accessToken: GITLAB_AGROMARKET_ACCESS_TOKEN, projectId: RepositoryId.agromarket })
 const docsGitlab = new GitlabApi({ accessToken: GITLAB_DOCS_ACCESS_TOKEN, projectId: RepositoryId.documents })
 const emailsGitlab = new GitlabApi({ accessToken: GITLAB_EMAILS_ACCESS_TOKEN, projectId: RepositoryId.emails })
-const repositories = [agromarketGitlab, emailsGitlab, docsGitlab]
+const poleUiGitlab = new GitlabApi({ accessToken: GITLAB_POLE_UI_ACCESS_TOKEN, projectId: RepositoryId.poleUi })
+
+const repositories = [agromarketGitlab, emailsGitlab, docsGitlab, poleUiGitlab]
 
 const newJira = new JiraApi({
   projectId: 'DEV',
@@ -47,7 +50,7 @@ apiTestRouter.get('/test/merge', async (ctx) => {
   await deleteTestMergeRequests()
 
   await timeout(4000)
-  
+
   await Promise.all(repositories.reduce((result, gitlab) => [
       ...result,
       gitlab.createBranch(targetBranchName, 'master'),
