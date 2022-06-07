@@ -18,6 +18,11 @@ const SlackDeveloper = {
   ealyakin: '<@U028MMK00LD> Женёк А.',
   'Nikolai.Maslak': '<@U028LTU016E> Коля М.',
   'nmaksimenko': '<@U028LTU016E> Никита М.',
+  'nikita.koshelev': '<@U03BUPHKZ6F> Никита К.',
+  'andrey.pike': '<@U03BX49QA12> Андрей П.',
+  'alexandr.papakhin': '<@U03C1SLE7T6> Саша П.',
+  'anton.sitnikov': '<@U03CU0TB1JQ> Антон С.',
+  'egor.papakhin': '<U03F4M9CZU6> Егор П.',
   commonGroup: 'C029LGA9R5L',
   rudakoff31: undefined,
 }
