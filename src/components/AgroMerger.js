@@ -89,6 +89,8 @@ class AgroMerger {
     const { repositories, jiraApis, sendMessage } = this
     const { key } = ticket
     const jira = jiraApis.find(jira => key.includes(jira.projectId))
+
+    this.sendMessage(`\n\nТикет *${key}*🦧`)
     const mergingResult = await Promise.all(repositories.map(gitlab => this.mergeMergeRequest({ ticketName: key, gitlab, jira })))
     const MRs = filter(mergingResult, { hasMR: true })
     const shouldCloseTicket = MRs.length > 0 && every(MRs, { isMerged: true })
@@ -123,7 +125,8 @@ class AgroMerger {
 
   mergeMergeRequest = async ({ ticketName, gitlab, jira }) => {
     const baseMergingConfig = { ticketName, gitlab, jira }
-    const { mergeRequest, shouldNotTryToMergeMR } = await this.getMR(baseMergingConfig)
+    const { mergeRequest, shouldNotTryToMergeMR, isAlreadyMerged } = await this.getMR(baseMergingConfig)
+    if (isAlreadyMerged) return { hasMR: true, isMerged: true }
     if (shouldNotTryToMergeMR) return { hasMR: false, isMerged: false }
 
     await timeout(5000) // Искусственная задержка для обновления данных в базе гитлаба
@@ -143,12 +146,16 @@ class AgroMerger {
       const { sendMessage } = this
       const isTargetBranchNotMaster = target_branch !== 'master'
       const projectName = RepositoryName[gitlab.projectId]
-      if (!MR) {
-        await sendMessage(`Ветки feature/${ticketName} нет в проекте ${projectName}🤓`)
+      const isAlreadyMerged = Boolean(MR?.merged_by)
+
+      if (isAlreadyMerged) {
+        await sendMessage(`*Уже была смержена* в проект ${projectName}🐙`)
+      } else if (!MR) {
+        await sendMessage(`Нет в проекте ${projectName}🤓`)
       } else if (isTargetBranchNotMaster) {
         await sendMessage(
           `
-            Таргет брэнч тикета *${ticketName}* в проекте ${projectName} смотрит не в master, а на *${target_branch}*😠
+            Таргет брэнч в проекте ${projectName} смотрит не в master, а на *${target_branch}*😠
             Пока что мержить не буду😤
 
             *МР*: ${web_url}
@@ -159,7 +166,8 @@ class AgroMerger {
 
       return {
         mergeRequest: MR,
-        shouldNotTryToMergeMR: !MR || isTargetBranchNotMaster,
+        shouldNotTryToMergeMR: !MR || isTargetBranchNotMaster || isAlreadyMerged,
+        isAlreadyMerged,
       }
     })
 

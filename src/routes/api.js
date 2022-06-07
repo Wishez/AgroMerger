@@ -62,9 +62,9 @@ apiRouter.get('/merge-requests-status', async (ctx) => {
     ${Object.keys(statusBeforeMerging).length ? '' : 'Тикетов для мержа нет🤷🏼‍♂️'}
     ${Object.keys(statusBeforeMerging).reduce((acc, projectId) => {
         let projectStatusMessage = `${RepositoryName[projectId]}\n`
-        if (data[projectId].length) {
-          projectStatusMessage += `*Количество:* ${data[projectId].length}шт.\n`
-          projectStatusMessage += `*Тикеры:*\n${data[projectId].map((tiketName) => `${tiketName} - ${newJira.baseUrl}browse/${tiketName}`).join('\n')}`
+        if (statusBeforeMerging[projectId]?.length) {
+          projectStatusMessage += `*Количество:* ${statusBeforeMerging[projectId].length}шт.\n`
+          projectStatusMessage += `*Тикеры:*\n${statusBeforeMerging[projectId].map((tiketName) => `${tiketName} - ${newJira.baseUrl}browse/${tiketName}`).join('\n')}`
         } else projectStatusMessage += 'Мержить нечего💩'
 
         return `${acc}${projectStatusMessage}\n\n`
