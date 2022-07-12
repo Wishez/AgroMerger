@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Router = require('@koa/router')
+const { partition } = require('lodash')
 const { AgroMerger } = require("../components/AgroMerger")
 const { RepositoryId, TelegramDeveloper, SlackDeveloper, RepositoryName } = require('../components/constants')
 const { GitlabApi } = require("../components/Gitlab")
@@ -57,18 +58,25 @@ apiRouter.post('/merge', async (ctx) => {
 
 apiRouter.get('/merge-requests-status', async (ctx) => {
   const { releaseVersion } = ctx.request?.query || {}
-  const statusBeforeMerging = await agroMerger.getMergeRequestsStatusBeforeMerging(releaseVersion)
-  const message = `Статус к мержу:
-    ${Object.keys(statusBeforeMerging).length ? '' : 'Тикетов для мержа нет🤷🏼‍♂️'}
-    ${Object.keys(statusBeforeMerging).reduce((acc, projectId) => {
+  const { sortedByProjectTicketsWithMergeRequests, releaseVersion: currentReleaseVersion } = await agroMerger.getMergeRequestsStatusBeforeMerging(releaseVersion)
+  const [waitingTickets, projectsWithoutTickets] = partition(Object.values(sortedByProjectTicketsWithMergeRequests), ({ tickets }) => tickets.length)
+  const message = `Статус к мержу ${currentReleaseVersion}:
+    ${!waitingTickets.length && !projectsWithoutTickets.length ? 'Тикетов для мержа нет🤷🏼‍♂️' : ''}
+    ${waitingTickets.reduce((result, { projectId, tickets }) => {
         let projectStatusMessage = `${RepositoryName[projectId]}\n`
-        if (statusBeforeMerging[projectId]?.length) {
-          projectStatusMessage += `*Количество:* ${statusBeforeMerging[projectId].length}шт.\n`
-          projectStatusMessage += `*Тикеры:*\n${statusBeforeMerging[projectId].map((tiketName) => `${tiketName} - ${newJira.baseUrl}browse/${tiketName}`).join('\n')}`
-        } else projectStatusMessage += 'Мержить нечего💩'
+        projectStatusMessage += `
+          *Количество:* ${tickets.length}шт.
+          *Тикеты:*\n${tickets.map(({ ticketName, ticket, mergeRequest }) => `
+            The best ${ticket.fields.customfield_10036.displayName}
+            ${ticketName} - ${ticket.fields.summary}
+            ${newJira.baseUrl}browse/${ticketName}
+            ${mergeRequest.web_url}
+          `).join('\n')}
+        `
 
-        return `${acc}${projectStatusMessage}\n\n`
+        return `${result}${projectStatusMessage}\n`
       }, '\n')}
+    По ${projectsWithoutTickets.map(({ projectId }) => RepositoryName[projectId]).join(', ')} мержить нечего💩
   `
   agroMerger.sendMessage(message)
 
