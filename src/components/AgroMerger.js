@@ -179,7 +179,7 @@ class AgroMerger {
   rebaseMR = async ({ ticketName, mergeRequest, gitlab }) =>
     gitlab.rebaseMergeRequest(mergeRequest).then(async ({ meta }) => {
       const { isStatusOk } = meta
-      const { author, has_conflicts, blocking_discussions_resolved } = mergeRequest
+      const { author, has_conflicts, blocking_discussions_resolved, web_url } = mergeRequest
       const isNotRebased = !isStatusOk || has_conflicts
       const projectName = RepositoryName[gitlab.projectId]
       const shouldAskDeveloperForRebase = isNotRebased && has_conflicts
@@ -190,7 +190,9 @@ class AgroMerger {
               ${shouldAskDeveloperForRebase ? 'Есть конфликты ребейза🐭' : ''}
               ${blocking_discussions_resolved ? '' : 'Комменты не зарезолвлены🐷'}
             `
-          : `Задачка *${ticketName}* проекта ${projectName} ребейзнута. Иду мержить😎`}`
+          : `Задачка *${ticketName}* проекта ${projectName} ребейзнута. Иду мержить😎`}
+          ${web_url}
+        `
       )
 
       if (shouldAskDeveloperForRebase) {
